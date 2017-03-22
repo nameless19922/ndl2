@@ -11,10 +11,10 @@
         { "name": "Ekans", "level": 5 },
         { "name": "Vulpix", "level": 5 },
         { "name": "Zubat", "level": 11 },
-        { "name": "Gloom", "level": 4 },
-        { "name": "Gloom", "level": 4 },
-        { "name": "Venonat", "level": 4 },
-        { "name": "Meowth", "level": 4 },
-        { "name": "Machamp", "level": 4 }
+        { "name": "Gloom", "level": 14 },
+        { "name": "Gloom", "level": 8 },
+        { "name": "Venonat", "level": 10 },
+        { "name": "Meowth", "level": 17 },
+        { "name": "Machamp", "level": 6 }
     ]
 }
