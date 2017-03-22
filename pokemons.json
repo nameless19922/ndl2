@@ -1,0 +1,20 @@
+{
+    "pokemons": [
+        { "name": "Picachu", "level": 8 },
+        { "name": "Bulbasaur", "level": 9 },
+        { "name": "Charizard", "level": 16 },
+        { "name": "Raichu", "level": 10 },
+        { "name": "Butterfree", "level": 15 },
+        { "name": "Psyduck", "level": 4 },
+        { "name": "Abra", "level": 7 },
+        { "name": "Caterpie", "level": 2 },
+        { "name": "Ekans", "level": 5 },
+        { "name": "Vulpix", "level": 5 },
+        { "name": "Zubat", "level": 11 },
+        { "name": "Gloom", "level": 4 },
+        { "name": "Gloom", "level": 4 },
+        { "name": "Venonat", "level": 4 },
+        { "name": "Meowth", "level": 4 },
+        { "name": "Machamp", "level": 4 }
+    ]
+}
