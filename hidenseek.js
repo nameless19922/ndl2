@@ -10,7 +10,7 @@ let numberPath = number => number !== 10 ? '0' + number : number + '',
 
     hidePokemons = (path, opts) => {    
         let number = numberPath(opts.numberFolder),
-            fullPath = pth.join(path + number);
+            fullPath = pth.join(path, number);
 
         return new Promise((resolve, reject) => {
             fs.mkdir(fullPath, (err, folder) => {
