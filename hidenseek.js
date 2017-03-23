@@ -2,19 +2,15 @@ const
     PokemonList = require('./pokemonlist'),
     Pokemon     = require('./pokemon'),
     random      = require('./random'),
+      
+    pth         = require('path'),
     fs          = require('fs');
 
-let 
+let numberPath = number => number !== 10 ? '0' + number : number + '',
 
-    correctPath = path => path.slice(-1) === '/' ? path : path + '/',
-
-    numberPath = number => number !== 10 ? '0' + number : number + '',
-
-    hidePokemons = (path, opts) => {
-        path = correctPath(path);
-
+    hidePokemons = (path, opts) => {    
         let number = numberPath(opts.numberFolder),
-            fullPath = path + number;
+            fullPath = pth.join(path + number);
 
         return new Promise((resolve, reject) => {
             fs.mkdir(fullPath, (err, folder) => {
@@ -34,7 +30,6 @@ let
             });
         });
     },
-
 
     findPokemons = path => {
         return new Promise((resolve, reject) => {
@@ -67,7 +62,6 @@ let
             fs.rmdirSync(path);
         }
     };
-
 
 module.exports = {
     hide: (path, pokemonList) => {
@@ -141,7 +135,9 @@ module.exports = {
             // iterate through the folders and look for pokemons
             result => {
                 return Promise.all(
-                    result.map(item => findPokemons(correctPath(path) + item))
+                    result.map(
+                        item => findPokemons(pth.join(path, item))
+                    )
                 )
             }
         )
