@@ -1,3 +1,5 @@
+const Pokemon = require('./pokemon');
+
 module.exports = class PokemonList extends Array {
     constructor(...pokemons) {
         super(...pokemons);
