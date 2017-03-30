@@ -7,21 +7,31 @@ const
     fs          = require('fs');
 
 let numberPath = number => number !== 10 ? '0' + number : number + '',
-
-    hidePokemons = (path, opts) => {    
+   
+    // get random pokemons
+    selectRandomPokemons = (pokemonList, number) => {
+        return [...new Array(number)].map(() => {
+            return pokemonList.splice(
+                random.integer(0, pokemonList.length - 1), 1
+            )[0];
+        })
+    },
+    
+    // hide pokemon in file
+    hidePokemon = (path, opts) => {    
         let number = numberPath(opts.numberFolder),
             fullPath = pth.join(path, number);
-
+        
         return new Promise((resolve, reject) => {
             fs.mkdir(fullPath, (err, folder) => {
                 if (err) {
                     reject(err);
                 } else {
                     if (opts.hiddenFolders.includes(opts.numberFolder)) {
-                        let hidden = opts.hiddenPokemons.splice(0, 1)[0];
-
-                        fs.writeFile(fullPath + '/pokemon.txt', hidden, (err) => {
-                            err ? reject(err) : resolve(hidden);
+                        let hiddenPokemon = opts.hiddenPokemons.splice(0, 1)[0];
+                        
+                        fs.writeFile(fullPath + '/pokemon.txt', hiddenPokemon, (err) => {
+                            err ? reject(err) : resolve(hiddenPokemon);
                         });
                     } else {
                         resolve(null);
@@ -31,6 +41,28 @@ let numberPath = number => number !== 10 ? '0' + number : number + '',
         });
     },
 
+    // сreate folders and hide pokemons
+    hidePokemons = (opts, pokemonList, path) => {
+        let hiddenNumber = pokemonList.length < opts.maxHidden ? pokemonList.length : opts.maxHidden,
+            
+            hiddenPokemons = selectRandomPokemons(pokemonList, hiddenNumber),
+            hiddenFolders = random.array(1, opts.numDirs, hiddenNumber);
+        
+        return Promise.all(
+            [...new Array(opts.numDirs).keys()].map(item => {
+                return hidePokemon(
+                    path,
+                    {
+                        hiddenPokemons,
+                        hiddenFolders,
+                        numberFolder: (item + 1)
+                    }
+                );
+            })
+        )
+    },
+
+    // search pokemons in "path"
     findPokemons = path => {
         return new Promise((resolve, reject) => {
             fs.readFile(path + '/pokemon.txt', { encoding: 'utf8' }, (err, data) => {
@@ -61,72 +93,38 @@ let numberPath = number => number !== 10 ? '0' + number : number + '',
 
             fs.rmdirSync(path);
         }
-    };
+    },
+    
+    filterPokemons = list => new PokemonList(...list.filter(item => item !== null));
+
 
 module.exports = {
     hide: (path, pokemonList) => {
-        const 
-            max = 3,
-            numberDirs = 10;
-
-        let length = pokemonList.length,
-            hiddenNumber = length < max ? length : max,
-
-            // choose three random pokemons
-            hiddenPokemons = [...new Array(hiddenNumber)].map(() => {
-                return pokemonList.splice(
-                    random.integer(
-                        0,
-                        pokemonList.length - 1
-                    ),
-                    1
-                )[0];
-            }),
-            // choose three random folders
-            hiddenFolders = random.array(1, numberDirs, hiddenNumber);
-
         rmDirRecursive(path);
-
-        new Promise((resolve, reject) => {
-            fs.mkdir(path, (err, folder) => {
-                err ? reject(err) : resolve(folder);
-            });
-        })
-        .then(
-            result => {
-                // сreate folders and hide pokemons
-                return Promise.all(
-                    [...new Array(numberDirs).keys()].map(item => {
-                        return hidePokemons(
-                            path,
-                            {
-                                hiddenPokemons,
-                                hiddenFolders,
-                                numberFolder: (item + 1)
-                            }
-                        );
-                    })
-                )
-            }
-        )
-        .then(
-            result => {
-                console.log('Hidden pokemons');
-
-                new PokemonList(
-                    ...result.filter(
-                        item => item !== null
-                    )
-                ).show();
-            }
-        )
-        .catch(
-            error => console.error(`EXCEPTION\n${error}`)
-        )
+        
+        let opts = { maxHidden: 3, numDirs: 10 },
+            
+            hidePromise = new Promise((resolve, reject) => {
+                fs.mkdir(path, (err, folder) => {
+                    err ? reject(err) : resolve(folder);
+                });
+            })
+            .then(
+                result => hidePokemons(opts, pokemonList, path)
+            )
+            .then(
+                result => {
+                    console.log('Hidden pokemons');
+                    filterPokemons(result).show();
+                }
+            )
+            .catch(
+                error => console.error(`EXCEPTION\n${error}`)
+            );
     },
 
     seek: (path) => {
-        new Promise((resolve, reject) => {
+        let seekPromise = new Promise((resolve, reject) => {
             fs.readdir(path, (err, files) => {
                 err ? reject(err) : resolve(files);
             });
@@ -144,12 +142,7 @@ module.exports = {
         .then(
             result => {
                 console.log('Found pokemons');
-
-                new PokemonList(
-                    ...result.filter(
-                        item => item !== null
-                    )
-                ).show();
+                filterPokemons(result).show();
             }
         )
         .catch(

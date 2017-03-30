@@ -31,7 +31,7 @@ const
                     console.log(`EXCEPTION\n${err.message}`);
                 }
             } else {
-                console.log('hide bad params: "node index hide <folder> <json file>"');
+                console.error('hide bad params: "node index hide <folder> <json file>"');
             }
         },
 

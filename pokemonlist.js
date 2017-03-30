@@ -1,10 +1,6 @@
 const Pokemon = require('./pokemon');
 
 module.exports = class PokemonList extends Array {
-    constructor(...pokemons) {
-        super(...pokemons);
-    }
-
     show() {
         console.log(`number: ${this.length}`);
         for (let item of this) {
