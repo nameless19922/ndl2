@@ -2,7 +2,7 @@ const
     fs = require('fs');
 
 let rmDirRecursive = (path, callback) => {
-    fs.readdir(path, function(err, files) {
+    fs.readdir(path, (err, files) => {
         if (err) {
             return callback(null, path);
         }
@@ -23,7 +23,7 @@ let rmDirRecursive = (path, callback) => {
         for (file of files) {
             let curPath = path + '/' + file;
 
-            fs.lstat(curPath, function(err, stats) {
+            fs.lstat(curPath, (err, stats) => {
                 if (err) {
                     return callback(err, path);
                 }
