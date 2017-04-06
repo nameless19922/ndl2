@@ -1,65 +1,68 @@
 const 
-    PokemonList = require('./pokemonlist'),
-    Pokemon     = require('./pokemon'),
-    random      = require('./random'),
-      
-    pth         = require('path'),
-    fs          = require('fs');
+    PokemonList    = require('./pokemonlist'),
+    Pokemon        = require('./pokemon'),
+    random         = require('./random'),
+    rmDirRecursive = require('./rmdirrecursive'),
+
+    pth            = require('path'),
+    fs             = require('fs');
 
 let numberPath = number => number !== 10 ? '0' + number : number + '',
-   
-    // get random pokemons
+
+    // get random pokemons from list
     selectRandomPokemons = (pokemonList, number) => {
-        return [...new Array(number)].map(() => {
-            return pokemonList.splice(
-                random.integer(0, pokemonList.length - 1), 1
-            )[0];
-        })
+        let randomPokemons = random.array(0, pokemonList.length - 1, number);
+
+        return randomPokemons.map(item => pokemonList[item]);
     },
-    
-    // hide pokemon in file
-    hidePokemon = (path, opts) => {    
-        let number = numberPath(opts.numberFolder),
-            fullPath = pth.join(path, number);
-        
+
+    // create folders for pokemons
+    createFolders = (numDirs, path) => {
+        let folders = [];
+
+        for (let i = 0; i < numDirs; i++) {
+            folders.push(i + 1);
+        }
+
+        return Promise.all(
+            folders.map(item => {
+                return createFolder(
+                    pth.join(path, numberPath(item))
+                );
+            })
+        );
+    },
+
+    createFolder = path => {
         return new Promise((resolve, reject) => {
-            fs.mkdir(fullPath, (err, folder) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    if (opts.hiddenFolders.includes(opts.numberFolder)) {
-                        let hiddenPokemon = opts.hiddenPokemons.splice(0, 1)[0];
-                        
-                        fs.writeFile(fullPath + '/pokemon.txt', hiddenPokemon, (err) => {
-                            err ? reject(err) : resolve(hiddenPokemon);
-                        });
-                    } else {
-                        resolve(null);
-                    }
-                }
+            fs.mkdir(path, err => {
+                err ? reject(err) : resolve(path);
             });
         });
     },
 
-    // сreate folders and hide pokemons
-    hidePokemons = (opts, pokemonList, path) => {
-        let hiddenNumber = pokemonList.length < opts.maxHidden ? pokemonList.length : opts.maxHidden,
-            
-            hiddenPokemons = selectRandomPokemons(pokemonList, hiddenNumber),
-            hiddenFolders = random.array(1, opts.numDirs, hiddenNumber);
-        
+    // hide pokemons in dirs from list
+    hidePokemons = (numDirs, maxHidden, pokemonList, paths) => {
+        let hiddenNumber = pokemonList.length < maxHidden ? pokemonList.length : maxHidden;
+        let hiddenPokemons = selectRandomPokemons(pokemonList, hiddenNumber);
+        let hiddenFolders = random.array(0, numDirs - 1, hiddenNumber);
+
         return Promise.all(
-            [...new Array(opts.numDirs).keys()].map(item => {
+            hiddenFolders.map(item => {
                 return hidePokemon(
-                    path,
-                    {
-                        hiddenPokemons,
-                        hiddenFolders,
-                        numberFolder: (item + 1)
-                    }
+                    paths[item],
+                    hiddenPokemons.shift()
                 );
             })
-        )
+        );
+    },
+
+    hidePokemon = (path, hiddenPokemon) => {    
+        return new Promise((resolve, reject) => {    
+            fs.writeFile(path + '/pokemon.txt', hiddenPokemon, (err) => {
+                err ? reject(err) : resolve(hiddenPokemon);
+            });
+        });
     },
 
     // search pokemons in "path"
@@ -83,48 +86,38 @@ let numberPath = number => number !== 10 ? '0' + number : number + '',
         });
     },
 
-    rmDirRecursive = path => {
-        if (fs.existsSync(path)) {
-            for (file of fs.readdirSync(path)) {
-                let curPath = path + "/" + file;
+    // create pokemon list from array
+    getPokemonList = list => Promise.resolve(new PokemonList(...list)),
 
-                fs.lstatSync(curPath).isDirectory() ? rmDirRecursive(curPath) : fs.unlinkSync(curPath);
-            }
-
-            fs.rmdirSync(path);
-        }
-    },
-    
-    filterPokemons = list => new PokemonList(...list.filter(item => item !== null));
+    getFindPokemons = list => list.filter(item => item !== null);
 
 
 module.exports = {
-    hide: (path, pokemonList) => {
-        rmDirRecursive(path);
-        
-        let opts = { maxHidden: 3, numDirs: 10 },
-            
-            hidePromise = new Promise((resolve, reject) => {
-                fs.mkdir(path, (err, folder) => {
-                    err ? reject(err) : resolve(folder);
-                });
-            })
-            .then(
-                result => hidePokemons(opts, pokemonList, path)
-            )
-            .then(
-                result => {
-                    console.log('Hidden pokemons');
-                    filterPokemons(result).show();
-                }
-            )
-            .catch(
-                error => console.error(`EXCEPTION\n${error}`)
-            );
+    hide: (path, pokemonList) => { 
+        let maxHidden = 3;
+        let numDirs = 10;
+
+        return new Promise((resolve, reject) => {
+            rmDirRecursive(path, err => {
+                err ? reject(err) : resolve(path);
+            });
+        })
+        .then(
+            result => createFolder(result)
+        )
+        .then(
+            result => createFolders(numDirs, result)
+        )
+        .then(
+            result => hidePokemons(numDirs, maxHidden, pokemonList, result)
+        )
+        .then(
+            result => getPokemonList(result)
+        );
     },
 
-    seek: (path) => {
-        let seekPromise = new Promise((resolve, reject) => {
+    seek: path => {
+        return new Promise((resolve, reject) => {
             fs.readdir(path, (err, files) => {
                 err ? reject(err) : resolve(files);
             });
@@ -141,12 +134,10 @@ module.exports = {
         )
         .then(
             result => {
-                console.log('Found pokemons');
-                filterPokemons(result).show();
+                let pokemons = getFindPokemons(result);
+
+                return getPokemonList(pokemons);
             }
-        )
-        .catch(
-            error => console.error(`EXCEPTION\n${error.message}`)
-        )
+        );
     }
 }

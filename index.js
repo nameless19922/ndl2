@@ -25,10 +25,20 @@ const
                             new PokemonList(
                                 ...pokemons.map(item => new Pokemon(item.name, item.level))
                             )
+                        )
+                        .then(
+                            result => {
+                                console.log('hidden pokemons');
+                                result.show();
+                            }
+                        )
+                        .catch(
+                            error => console.error(`EXCEPTION\n${error}`)
                         );
+
                     }
-                } catch (err) {
-                    console.log(`EXCEPTION\n${err.message}`);
+                } catch (error) {
+                    console.log(`EXCEPTION\n${error}`);
                 }
             } else {
                 console.error('hide bad params: "node index hide <folder> <json file>"');
@@ -38,7 +48,19 @@ const
         seek: args => {
             let folder = args[1];
 
-            folder ? hidenseek.seek(folder) : console.log('seek bad params: "node index seek <folder>"');
+            if (folder) {
+                hidenseek.seek(folder)
+                .then(
+                    result => {
+                        result.show();
+                    }
+                )
+                .catch(
+                    error => console.error(`EXCEPTION\n${error}`)
+                );
+            } else {
+                console.log('seek bad params: "node index seek <folder>"');
+            }
         }
     };
 
