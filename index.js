@@ -35,7 +35,6 @@ const
                         .catch(
                             error => console.error(`EXCEPTION\n${error}`)
                         );
-
                     }
                 } catch (error) {
                     console.log(`EXCEPTION\n${error}`);
