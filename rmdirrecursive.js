@@ -7,33 +7,30 @@ let rmDirRecursive = (path, callback) => {
             return callback(null, path);
         }
 
-        let wait = files.length;
+        let length = files.length;
         let count = 0;
-        let folderDone = function(err) {
+        let folderDone = err => {
             count++;
-            if (count >= wait || err) {
+            if (count >= length || err) {
                 fs.rmdir(path, callback);
             }
         };
 
-        if (!wait) {
+        if (!length) {
             return folderDone();
         }
 
-        files.forEach(function(file) {
+        for (file of files) {
             let curPath = path + '/' + file;
 
             fs.lstat(curPath, function(err, stats) {
                 if (err) {
                     return callback(err, path);
                 }
-                if (stats.isDirectory()) {
-                    rmDirRecursive(curPath, folderDone);
-                } else {
-                    fs.unlink(curPath, folderDone);
-                }
+                
+                stats.isDirectory() ? rmDirRecursive(curPath, folderDone) : fs.unlink(curPath, folderDone);
             });
-        });
+        }
     });
 };
 
