@@ -12,8 +12,8 @@ const
     // method call from the command line
     app = {
         hide: args => {
-            let folder = args[1],
-                file = args[2];
+            let folder = args[1];
+            let file = args[2];
 
             if (folder && file) {
                 try {
