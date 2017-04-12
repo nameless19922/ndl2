@@ -7,7 +7,9 @@ const fs          = require('fs');
 
 const args = process.argv.slice(2);
 
-    // method call from the command line
+let getPokemons = pokemons => pokemons.map(item => new Pokemon(item.name, item.level));
+
+// method call from the command line
 const app = {
     hide: args => {
         let folder = args[1];
@@ -20,9 +22,7 @@ const app = {
                 if (pokemons) {
                     hidenseek.hide(
                         folder,
-                        new PokemonList(
-                            ...pokemons.map(item => new Pokemon(item.name, item.level))
-                        )
+                        new PokemonList(...getPokemons(pokemons))
                     )
                     .then(
                         result => {
@@ -30,9 +30,7 @@ const app = {
                             result.show();
                         }
                     )
-                    .catch(
-                        error => console.error(`EXCEPTION\n${error}`)
-                    );
+                    .catch(error => console.error(`EXCEPTION\n${error}`));
                 }
             } catch (error) {
                 console.log(`EXCEPTION\n${error}`);
@@ -52,8 +50,7 @@ const app = {
                     result.show();
                 }
             )
-            .catch(
-                error => console.error(`EXCEPTION\n${error}`)
+            .catch(error => console.error(`EXCEPTION\n${error}`)
             );
         } else {
             console.log('seek bad params: "node index seek <folder>"');
