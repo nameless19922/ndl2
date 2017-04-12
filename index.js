@@ -20,10 +20,7 @@ const app = {
                 let pokemons = require(file).pokemons;
 
                 if (pokemons) {
-                    hidenseek.hide(
-                        folder,
-                        new PokemonList(...getPokemons(pokemons))
-                    )
+                    hidenseek.hide(folder, new PokemonList(...getPokemons(pokemons)))
                     .then(
                         result => {
                             console.log('hidden pokemons');

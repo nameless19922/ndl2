@@ -18,8 +18,7 @@ let rmDirRecursive = (path, callback) => {
             folderDone();
         } else {
             for (file of files) {
-                let curPath = path + '/' + file;
-                
+                let curPath = path + '/' + file;               
                 fs.lstat(curPath, (err, stats) => {
                     if (err) {
                         return callback(err, path);
