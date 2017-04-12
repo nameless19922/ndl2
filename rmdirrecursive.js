@@ -1,5 +1,4 @@
-const 
-    fs = require('fs');
+const fs = require('fs');
 
 let rmDirRecursive = (path, callback) => {
     fs.readdir(path, (err, files) => {
