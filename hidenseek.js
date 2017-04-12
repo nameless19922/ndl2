@@ -38,7 +38,7 @@ let createFolder = path => {
             err ? reject(err) : resolve(path);
         });
     });
-}
+};
 
 // hide pokemons in dirs from list
 let hidePokemons = (numDirs, maxHidden, pokemonList, paths) => {
